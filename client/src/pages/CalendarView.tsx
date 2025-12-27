@@ -74,7 +74,7 @@ const CalendarView = () => {
             </Box>
 
             <Grid container spacing={3} sx={{ height: '100%' }}>
-                <Grid item xs={12} md={9}>
+                <Grid size={{ xs: 12, md: 9 }}>
                     <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 2 }}>
                         {/* Custom Toolbar-like controls if needed, or rely on default */}
                         <Calendar
@@ -92,7 +92,7 @@ const CalendarView = () => {
                         />
                     </Paper>
                 </Grid>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                     <Stack spacing={3}>
                         <Card sx={{ boxShadow: 2 }}>
                             <CardContent>
