@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://user:password@localhost:5432/assetflow?schema=public"
+}
+
+enum Role {
+  MANAGER
+  TECHNICIAN
+  EMPLOYEE
+}
+
+enum Status {
+  ACTIVE
+  MAINTENANCE
+  SCRAP
+}
+
+enum RequestStatus {
+  NEW
+  IN_PROGRESS
+  REPAIRED
+  SCRAP
+}
+
+enum RequestType {
+  CORRECTIVE
+  PREVENTIVE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(EMPLOYEE)
+  teamId    Int?
+  team      MaintenanceTeam? @relation(fields: [teamId], references: [id])
+  requests  MaintenanceRequest[] // Requests assigned to technician
+  createdRequests MaintenanceRequest[] @relation("CreatedRequests") // Requests created by user
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MaintenanceTeam {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  members   User[]
+  equipments Equipment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Equipment {
+  id             Int      @id @default(autoincrement())
+  name           String
+  serialNumber   String   @unique
+  department     String
+  location       String
+  purchaseDate   DateTime
+  warrantyExpiry DateTime?
+  status         Status   @default(ACTIVE)
+  
+  teamId         Int?
+  team           MaintenanceTeam? @relation(fields: [teamId], references: [id])
+  
+  requests       MaintenanceRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MaintenanceRequest {
+  id          Int      @id @default(autoincrement())
+  subject     String
+  description String?
+  type        RequestType
+  status      RequestStatus @default(NEW)
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+
+  equipmentId Int
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+
+  technicianId Int?
+  technician   User?    @relation(fields: [technicianId], references: [id])
+  
+  createdByUserId Int
+  createdByUser   User @relation("CreatedRequests", fields: [createdByUserId], references: [id])
+
+  scheduledDate DateTime?
+  duration      Int?      // In minutes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
